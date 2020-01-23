@@ -7,10 +7,16 @@ export const Form = styled.form`
 
   input {
     flex: 1;
-    border-radius: 1px solid #eee;
+    border: 2px solid #eee;
     padding: 10px 15px;
     border-radius: 4px;
     font-size: 16px;
+
+    ${props =>
+      props.error &&
+      css`
+        border: 2px solid red;
+      `}
   }
 `;
 

@@ -1,18 +1,20 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import { withSnackbar } from 'notistack';
 import { FaGithubAlt, FaPlus, FaSpinner } from 'react-icons/fa';
 
 import api from '../../services/api';
 import Container from '../../components/Container';
 import { Form, SubmitButton, List } from './styles';
 
-export default class Main extends Component {
+class Main extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
       newRepo: '',
       repositories: [],
+      error: false,
       loading: false,
     };
   }
@@ -34,43 +36,71 @@ export default class Main extends Component {
   }
 
   handleInputChange = e => {
-    this.setState({ newRepo: e.target.value });
+    this.setState({ error: false, newRepo: e.target.value });
   };
 
   handleSubmit = async e => {
-    e.preventDefault();
+    const { enqueueSnackbar } = this.props;
 
-    this.setState({ loading: true });
+    try {
+      e.preventDefault();
 
-    const { newRepo, repositories } = this.state;
-    const response = await api.get(`/repos/${newRepo}`);
+      this.setState({ loading: true });
 
-    const data = {
-      name: response.data.full_name,
-    };
+      const { newRepo, repositories } = this.state;
 
-    this.setState({
-      repositories: [...repositories, data],
-      newRepo: '',
-      loading: false,
-    });
+      if (repositories.find(item => item.name === newRepo)) {
+        throw new Error('Repositório duplicado');
+      }
+      const response = await api.get(`/repos/${newRepo}`);
+      if (response === null) {
+        throw new Error('Repositório não encontrado');
+      }
+
+      const data = {
+        name: response.data.full_name,
+      };
+
+      this.setState({
+        repositories: [...repositories, data],
+        newRepo: '',
+        loading: false,
+        error: false,
+      });
+    } catch (err) {
+      enqueueSnackbar(err.message, {
+        variant: 'error',
+        anchorOrigin: {
+          vertical: 'bottom',
+          horizontal: 'center',
+        },
+        autoHideDuration: 3000,
+      });
+
+      this.setState({
+        loading: false,
+        newRepo: '',
+        error: true,
+      });
+    }
   };
 
   render() {
-    const { newRepo, repositories, loading } = this.state;
+    const { newRepo, repositories, loading, error } = this.state;
     return (
       <Container>
         <h1>
           <FaGithubAlt /> Repositórios
         </h1>
 
-        <Form onSubmit={this.handleSubmit}>
+        <Form onSubmit={this.handleSubmit} error={error}>
           <input
             type="text"
             placeholder="Adicionar repositório"
             value={newRepo}
             onChange={this.handleInputChange}
           />
+
           <SubmitButton>
             {loading ? (
               <FaSpinner color="#FFF " size={14} />
@@ -94,3 +124,5 @@ export default class Main extends Component {
     );
   }
 }
+
+export default withSnackbar(Main);

@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import Container from '../../components/Container';
 
-import { Loading, Owner, IssuList } from './styles';
+import { Loading, Spinner, Owner, IssuList } from './styles';
 
 export default class Repository extends Component {
   // eslint-disable-next-line react/sort-comp
@@ -54,7 +54,14 @@ export default class Repository extends Component {
     return (
       <>
         {loading ? (
-          <Loading>Carregando</Loading>
+          <Loading>
+            <Spinner>
+              <div />
+              <div />
+              <div />
+            </Spinner>
+            Carregando...
+          </Loading>
         ) : (
           <Container>
             <Owner>

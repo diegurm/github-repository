@@ -1,4 +1,5 @@
 import React from 'react';
+import { SnackbarProvider } from 'notistack';
 import Routes from './routes';
 
 import GlobalStyle from './styles/global';
@@ -6,7 +7,9 @@ import GlobalStyle from './styles/global';
 function App() {
   return (
     <>
-      <Routes />
+      <SnackbarProvider>
+        <Routes />
+      </SnackbarProvider>
       <GlobalStyle />
     </>
   );
